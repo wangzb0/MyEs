@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <style>
+        #xx p:hover {
+            background-color: #eeeeee;
+            cursor: pointer;
+        }
+
+        .oo {
+            position: absolute;
+            border: 1px solid white;
+            z-index: 999;
+            background-color: white;
+            width: 200px;
+            padding: 6px 12px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Brand</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="搜，必达...." oninput="suggest()"
+                           id="searchMsg">
+                </div>
+                <button type="button" class="btn btn-default" onclick="foo(actionType)">搜索，走</button>
+                <span id="totalNum"></span>
+                <div id="xx"></div>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 col-lg-offset-2">
+            <ul class="nav nav-tabs" id="btnGroup">
+                <li class="active" tag="all"><a target="_self" href="#">全部</a></li>
+                <li tag="news"><a target="_self" href="#">新闻</a></li>
+                <li tag="advice"><a target="_self" href="#">导购</a></li>
+                <li tag="drive"><a target="_self" href="#">试驾评测</a></li>
+                <li tag="use"><a target="_self" href="#">用车</a></li>
+                <li tag="culture"><a target="_self" href="#">文化</a></li>
+                <li tag="travels"><a target="_self" href="#">游记</a></li>
+                <li tag="tech"><a target="_self" href="#">技术</a></li>
+                <li tag="tuning"><a target="_self" href="#">改装赛事</a></li>
+                <li tag="ev"><a target="_self" href="#">新能源</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-lg-offset-2">
+            <div id="showData">
+                {% for foo in all_obj %}
+                    <h3>{{ foo.title }}</h3>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    var actionType = "all";
+
+    // 搜索
+    function foo(actionType) {
+        var searchMsg = $('#searchMsg').val();
+        $("#xx").empty().removeClass("oo");
+        {#console.log(searchMsg);#}
+        $.ajax({
+            url: "/index/",
+            type: "GET",
+            data: {"search_msg": searchMsg, "flag": 'xxxx', "action_type": actionType},
+            success: function (data) {
+                {#console.log(data);#}
+                $("#showData").html("");
+                if (data) {
+                    $("#totalNum").html("约 <b style='color:red'>" + data.hits.total + "</b>条结果");
+                    $.each(data.hits.hits, function (index, item) {
+                        {#console.log(item._source.title);#}
+                        {#imgUrl = item._source.img_url.replace(item._source.img_url.split("/")[5]);#}
+
+                        target = "<a href=" + item._source.a_url + ">\n" +
+                            "                                <div class=\"article-pic\">" +
+                            "<img src=" + "" + ">" +
+                            "</div>\n" +
+                            "                                <h3>" + item.highlight.title + "</h3>\n" +
+                            "                                <div class=\"article-bar\">\n" +
+                            "                                    <span class=\"fn-left\"></span>\n" +
+                            "                                    <span class=\"fn-right\">\n" +
+                            "                                        <em><i class=\"icon12 icon12-eye\"></i></em>\n" +
+                            "                                        <em data-class=\"icon12 icon12-infor\" data-articleid=\"950414\"><i class=\"icon12 icon12-infor\"></i>9</em>\n" +
+                            "                                    </span>\n" +
+                            "                                </div>\n" +
+                            "                                <p>" + item._source.summary + "</p>\n" +
+                            "                            </a>";
+                        $("#showData").append(target);
+                    })
+                }
+            }
+        })
+    }
+
+    // 标签分类
+    $("#btnGroup li").click(function () {
+        {#console.log($(this).attr("tag"));#}
+        $(this).addClass("active").siblings().removeClass("active");
+        foo($(this).attr("tag"));
+    })
+
+    // 建议器
+    function suggest() {
+        var search_msg = $("#searchMsg").val();
+        if (search_msg == '') {
+            $("#xx").empty().removeClass("oo");
+        } else {
+            $("#xx").addClass("oo");
+        }
+        $.ajax({
+            url: "/suggest/",
+            type: "POST",
+            data: {"search_msg": search_msg},
+            success: function (data) {
+                var html = "";
+                $.each(data, function (index, item) {
+                    html += "<p>" + item + "</p>";
+                });
+                $("#xx").html(html);
+                $("#xx p").click(function () {
+                    var d = $(this).text();
+                    $("#searchMsg").val(d);
+                    foo(actionType);
+                    $("#xx").empty().removeClass('oo');
+                });
+            }
+        })
+    }
+
+
+</script>
+</html>
